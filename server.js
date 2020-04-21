@@ -26,15 +26,23 @@ function handleConnection(socket) {
               break;
           }
       }
-      console.log(`Request header: \n${reqHeader}`);
-
-      reqBuffer=new Buffer('');
-      while ((buf=socket.read())!==null) {
-          reqBuffer=Buffer.concat([reqBuffer,buf]);
-      }
       
-      let reqBody=reqBuffer.toString();
-       console.log(`Request body:\n${reqBody}`);
-       socket.end('HTTP/1.1 200 OK\r\nServer: my-custom-server\r\nContent-Length: 0\r\n\r\n');
+      const reqHeaders=reqHeader.split('\r\n');
+      const reqLine=reqHeaders.shift().split(' ');
+      const headers=reqHeaders.reduce((acc,currentHeader)=>{
+          const [key,value]=currentHeader.split(':');
+          return{
+              ...acc,
+              [key.trim().toLocaleLowerCase()]:value.trim()
+          };
+      },{});
+
+      const request={
+          method:reqLine[0],
+          url : reqLine[1],
+          httpVersion:reqLine[2].split('/')[1],
+          headers,
+          socket
+      }
    });
 }
