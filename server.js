@@ -44,5 +44,31 @@ function handleConnection(socket) {
           headers,
           socket
       }
+
+      let status=200,statusText='OK',headersSent=false,isChunked=false;
+      const responseHeaders={
+          server:'my-custom-server'
+      };
+
+      function setHeader(key,value) {
+          responseHeaders[key.toLocaleLowerCase()]=value;
+      }
+
+      function sendHeaders() {
+          if(!headersSent){
+              headersSent=true;
+
+              setHeader('date',new Date().toLocaleDateString());
+              socket.write(`HTTP/1.1 ${status} ${statusText}\r\n`);
+
+              Object.keys(responseHeaders).forEach(headerKey=>{
+                  socket.write(`${headerKey}: ${responseHeaders[headerKey]}\r\n`);
+              });
+
+              socket.write('\r\n');
+            }
+      }
+
+      
    });
 }
